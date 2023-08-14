@@ -23,9 +23,17 @@ public class IofXmlManager
 				if (teamMemberResults.Count > maxAllowedLegsPerTeam)
 					throw new InvalidOperationException($"Maximum {maxAllowedLegsPerTeam} allowed, but there are {teamMemberResults.Count} legs per team!");
 
+				XElement organisation = teamResult.Descendants(Namespace + "Organisation").First();
+				XElement country = organisation.Descendants(Namespace + "Country").First();
+
+				XElement nationality = new(Namespace + "Nationality", new XAttribute("code", country.Attribute("code")!.Value));
+				nationality.Add(country.Value);
+
 				foreach (XElement teamMemberResult in teamMemberResults)
 				{
 					XElement person = teamMemberResult.Descendants(Namespace + "Person").First();
+					person.Add(nationality);
+
 					string firstName = person.Descendants(Namespace + "Given").First().Value;
 					string lastName = person.Descendants(Namespace + "Family").First().Value;
 
@@ -33,12 +41,26 @@ public class IofXmlManager
 						continue;
 
 					XElement personResult = new(Namespace + "PersonResult", person);
+					personResult.Add(organisation);
 
 					XElement relayLegResult = teamMemberResult.Descendants(Namespace + "Result").First();
-					XElement individualResult = new(Namespace + "Result", relayLegResult.Descendants(Namespace + "StartTime").First());
+					XElement individualResult = new(Namespace + "Result");
+
+					string? bibNumber = relayLegResult.Descendants(Namespace + "BibNumber").FirstOrDefault()?.Value;
+					if (!string.IsNullOrEmpty(bibNumber))
+					{
+						if (bibNumber.IndexOf('.') > 0)
+						{
+							bibNumber = bibNumber.Substring(0, bibNumber.IndexOf('.'));
+						}
+
+						individualResult.Add(new XElement(Namespace + "BibNumber", bibNumber));
+					}
 					
+					individualResult.Add(relayLegResult.Descendants(Namespace + "StartTime").First());
 					individualResult.Add(relayLegResult.Descendants(Namespace + "FinishTime").First());
 					individualResult.Add(relayLegResult.Descendants(Namespace + "Time").First());
+					individualResult.Add(new XElement(Namespace + "TimeBehind", relayLegResult.Descendants(Namespace + "TimeBehind").First().Value));
 					individualResult.Add(new XElement(Namespace + "Position", relayLegResult.Descendants(Namespace + "Position").First().Value));
 					individualResult.Add(relayLegResult.Descendants(Namespace + "Status").First());
 					individualResult.Add(relayLegResult.Descendants(Namespace + "SplitTime"));

@@ -9,10 +9,10 @@ public class IofXmlManagerTests
 	public void FromRelayResultsToIndividualResults_Simple()
 	{
 		//arrange
-		XDocument relayXml = LoadXml("relays-results-CPS-1.xml");
+		XDocument relayXml = LoadXml("wc2023_sprint_relay_results.xml");
 
 		//act
-		XDocument individualXml = IofXmlManager.FromRelayResultsToIndividualResults(relayXml, 3);
+		XDocument individualXml = IofXmlManager.FromRelayResultsToIndividualResults(relayXml, 4);
 	}
 
 	private XDocument LoadXml(string xmlFileName)
