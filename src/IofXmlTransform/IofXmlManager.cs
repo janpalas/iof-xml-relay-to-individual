@@ -23,11 +23,14 @@ public class IofXmlManager
 				if (teamMemberResults.Count > maxAllowedLegsPerTeam)
 					throw new InvalidOperationException($"Maximum {maxAllowedLegsPerTeam} allowed, but there are {teamMemberResults.Count} legs per team!");
 
+				XElement entryId = teamResult.Descendants(Namespace + "EntryId").First();
+
 				XElement organisation = teamResult.Descendants(Namespace + "Organisation").First();
 				XElement country = organisation.Descendants(Namespace + "Country").First();
 
 				XElement nationality = new(Namespace + "Nationality", new XAttribute("code", country.Attribute("code")!.Value));
 				nationality.Add(country.Value);
+				country.Remove();
 
 				foreach (XElement teamMemberResult in teamMemberResults)
 				{
@@ -40,7 +43,8 @@ public class IofXmlManager
 					if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
 						continue;
 
-					XElement personResult = new(Namespace + "PersonResult", person);
+					XElement personResult = new(Namespace + "PersonResult", entryId);
+					personResult.Add(person);
 					personResult.Add(organisation);
 
 					XElement relayLegResult = teamMemberResult.Descendants(Namespace + "Result").First();
