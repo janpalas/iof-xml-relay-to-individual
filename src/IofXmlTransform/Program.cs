@@ -39,7 +39,7 @@ if (!File.Exists(inputFilePath))
 try
 {
 	XDocument relayXml = XDocument.Load(inputFilePath);
-	XDocument individualXml = IofXmlManager.FromRelayResultsToIndividualResults(relayXml);
+	XDocument individualXml = IofXmlManager.FromRelayToIndividualResults(relayXml);
 
 	individualXml.Save(outputFilePath);
 
