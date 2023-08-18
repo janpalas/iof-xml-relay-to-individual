@@ -5,15 +5,23 @@ using IofXmlTransform;
 
 Console.WriteLine("Starting IOF XML transformation...");
 
-if (args.Length < 2)
+if (args.Length < 3)
 {
-	Console.WriteLine("Invalid parameters. Usage: IofXmlTransform <<path to input file>> <<path to output file>>");
+	Console.WriteLine("Invalid parameters. Usage: IofXmlTransform <<type>> <<path to input file>> <<path to output file>>");
 	Console.ReadKey();
 	return;
 }
 
-string inputFilePath = args[0];
-string outputFilePath = args[1];
+string type = args[0].ToLower();
+string inputFilePath = args[1];
+string outputFilePath = args[2];
+
+if (type != "-e" && type != "-r")
+{
+	Console.WriteLine($"Invalid transformation type '{type}'! Use '-e' for entries, '-r' for results.");
+	Console.ReadKey();
+	return;
+}
 
 if (string.IsNullOrEmpty(inputFilePath))
 {
@@ -38,10 +46,10 @@ if (!File.Exists(inputFilePath))
 
 try
 {
-	XDocument relayXml = XDocument.Load(inputFilePath);
-	XDocument individualXml = IofXmlManager.FromRelayToIndividualResults(relayXml);
+	XDocument inputXml = XDocument.Load(inputFilePath);
 
-	individualXml.Save(outputFilePath);
+	XDocument outputXml = type == "-e" ? IofXmlManager.FromIndividualToRelayEntries(inputXml) : IofXmlManager.FromRelayToIndividualResults(inputXml);
+	outputXml.Save(outputFilePath);
 
 	Console.WriteLine("Transformation completed!");
 }
